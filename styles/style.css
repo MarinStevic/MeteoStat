@@ -1,0 +1,121 @@
+.sidebar {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #356c94;
+    overflow-x: hidden;
+    transition: 0.5s;
+}
+
+.sidebar a {
+    padding: 5px 8px 8px 14px;
+    text-decoration: none;
+    font-size: 20px;
+    color: #f1f1f1;
+    display: block;
+    transition: 0.3s;
+}
+
+.sidebar a:hover {
+    color: #ededed;
+}
+
+.sidebar .closebtn {
+    position: absolute;
+    top: 0;
+    right: 0px;
+    font-size: 36px;
+}
+
+.openbtn {
+    font-size: 20px;
+    cursor: pointer;
+    background-color: #356c94;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    width: 47px;
+}
+
+.openbtn:hover {
+    background-color: #3c79a3;
+}
+
+#main {
+  transition: margin-left .5s; /* If you want a transition effect */
+    height: 100%;
+}
+
+@media screen and (max-height: 450px) {
+  .sidebar {padding-top: 15px;}
+  .sidebar a {font-size: 18px;}
+}
+
+body {
+    font-family: "Lato", sans-serif;
+    margin: 0px;
+}
+
+.kontejner {
+    height: 100%;
+    display: grid;
+    grid-template-columns: 47px 1fr;
+    grid-template-rows: 47px 1fr;
+    grid-gap: 0px;
+}
+
+html, body {
+  height: 100%;
+}
+
+#treci {
+    background-color: #356c94;
+}
+
+#drugi {
+    position: relative;
+}
+
+#main-title {
+    text-align: center;
+    margin: 0px;
+    position: absolute;
+    top: 50%;
+    right: 50%;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+    color: #3c79a3;
+}
+
+#sub-title {
+    text-decoration: none;
+    text-align: left;
+    margin: 0px;
+    position: absolute;
+    top: 50%;
+    right: 98%;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+    color: #3c79a3;
+}
+
+#sidebar-padding {
+    height: 60px;
+}
+
+#map {
+    height: 60%;
+    width: 100%;
+}
+
+#graph {
+    height: 40%;
+    margin: 0;
+}
+
+.fas.fa-crosshairs.fa-2x {
+  color: #ededed;
+}

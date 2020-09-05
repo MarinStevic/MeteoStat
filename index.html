@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Meteo Stat</title>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon">
+    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/leaflet-sidebar.css" media="all" type="text/css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+</head>
+<body>
+    <div id="main">
+        <div id="mySidebar" class="sidebar">
+            <h1 class="leaflet-sidebar-header">City list</h1>
+            <input id="city-list-search" class="sidebar-search" placeholder="Search for cities..." title="Type in a name" oninput="sidebarSearch('city-list-search','city-list-table')" type="text">
+            <br>
+            <table id="city-list-table" class="sidebar-table">
+                <tbody>
+                    <tr class="sidebar-table-row-header">
+                        <th class="sidebar-table-name">
+                            <h2 class="sidebar-table-name">Name</h2>
+                        </th>
+                        <th class="sidebar-table-locate">
+                        </th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="kontejner">
+            <div><button class="openbtn" onclick="toggleNav()">☰</button></div>
+            <div id="drugi">
+                <h2 id="main-title">Meteo Stat</h2>
+            </div>
+            <div id="treci"></div>
+            <div>
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/code.js"></script>
+</body>
+</html>
