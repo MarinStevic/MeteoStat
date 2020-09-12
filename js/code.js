@@ -97,21 +97,210 @@ function sidebarSearch(input,table) {
     }
 }
 
+function getImageData(station) {
+    var imageUrl;
+    var imageWidth = 75;
+    var imageHeight = 75;
+    var imageUrlTemplate = 'https://openweathermap.org/img/w/{icon}.png';
+    if (station.weather && station.weather[0] && station.weather[0].icon) {
+        imageUrl = imageUrlTemplate.replace('{icon}', station.weather[0].icon);
+    } else if (station.type && station.type == 1) {
+        imageUrl = 'https://openweathermap.org/img/s/iplane.png';
+        imageWidth = 25;
+        imageHeight = 25;
+    } else {
+        imageUrl = 'https://openweathermap.org/img/s/istation.png';
+        imageWidth = 25;
+        imageHeight = 25;
+    }
+    return {url: imageUrl, width: imageWidth, height: imageHeight};
+}
+
+function convertTimestamp(tstmp) {
+    return (new Date(tstmp*1000));
+}
+
 //Showing the selected city
 function locateAndShowCity(lat, lon, name) {
-    var popup = L.popup()
-        .setLatLng([lat, lon])
-        .setContent("City: " + name)
-        .openOn(map);
-    map.setView([lat, lon],13);
+    $.ajax({
+        url: 'https://api.openweathermap.org/data/2.5/onecall?units=metric&lat='+lat+'&lon='+lon+'&exclude=minutely,daily,alerts&appid=6e56fb3433479d82ffab33418b64eb3b',
+        async: false,
+        dataType: 'json',
+        success: function (response) {
+            //console.log(response);
+            var station = response.current;
+
+            var txt = '<div class="owm-popup-name">';
+            txt += name;
+            txt += '</div>';
+            if (typeof station.weather != 'undefined' && typeof station.weather[0] != 'undefined') {
+                if (typeof station.weather[0].description != 'undefined'/* && typeof station.weather[0].id != 'undefined'*/) {
+                    txt += '<div class="owm-popup-description">'
+                        + station.weather[0].description// + ' (' + station.weather[0].id + ')'
+                        + '</div>';
+                }
+            }
+            var imgData = getImageData(station);
+            txt += '<div class="owm-popup-main"><img src="' + imgData.url + '" width="' + imgData.width
+                    + '" height="' + imgData.height + '" border="0" />';
+            if (typeof station != 'undefined' && typeof station.temp != 'undefined') {
+                txt += '<span class="owm-popup-temp">' + station.temp
+                    + '&nbsp;°C</span>';
+            }
+            txt += '</div>';
+            txt += '<div class="owm-popup-details">';
+            if (typeof station != 'undefined') {
+                if (typeof station.humidity != 'undefined') {
+                    txt += '<div class="owm-popup-detail">'
+                        + 'Humidity'
+                        + ': ' + station.humidity + '&nbsp;%</div>';
+                }
+                if (typeof station.pressure != 'undefined') {
+                    txt += '<div class="owm-popup-detail">'
+                        + 'Pressure'
+                        + ': ' + station.pressure + '&nbsp;hPa</div>';
+                }
+                if (true) {
+                    if (typeof station.temp_max != 'undefined' && typeof station.temp_min != 'undefined') {
+                        txt += '<div class="owm-popup-detail">'
+                            + 'Temp. min/max'
+                            + ': '
+                                + station.temp_min
+                            + '&nbsp;/&nbsp;'
+                            + station.temp_max
+                            + '&nbsp;°C</div>';
+                    }
+                }
+            }
+            if (station.rain != null && typeof station.rain != 'undefined' && typeof station.rain['1h'] != 'undefined') {
+                txt += '<div class="owm-popup-detail">'
+                    + 'Rain (1h)'
+                    + ': ' + station.rain['1h'] + '&nbsp;ml</div>';
+            }
+            if (typeof station.wind_speed != 'undefined' && typeof station.wind_deg != 'undefined') {
+                if (typeof station.wind_speed != 'undefined') {
+                    txt += '<div class="owm-popup-detail">';
+                    txt += 'Wind' + ': '
+                        + station.wind_speed + '&nbsp;'
+                        + 'm/s';
+                    txt += '</div>';
+                }
+                if (typeof station.wind_deg != 'undefined') {
+                    txt += '<div class="owm-popup-detail">';
+                    txt += 'Direction' + ': ';
+                    txt += station.wind_deg + '°';
+                    txt += '</div>';
+                }
+            }
+            if (typeof station.dt != 'undefined' && true) {
+                txt += '<div class="owm-popup-timestamp">';
+                txt += '(' + convertTimestamp(station.dt) + ')';
+                txt += '</div>';
+            }
+            txt += '</div>';
+            var popup = L.popup()
+                .setLatLng([lat, lon])
+                .setContent(txt)
+                .openOn(map);
+            map.setView([lat, lon],13);
+        }
+    });
 }
 
 function onMapClick(e) {
-    var popup = L.popup();
-    popup
-        .setLatLng(e.latlng)
-        .setContent("You clicked the map at " + e.latlng.toString())
-        .openOn(map);
+    var lat = e.latlng.lat;
+    var lon = e.latlng.lng;
+    $.ajax({
+        url: 'https://api.openweathermap.org/data/2.5/onecall?units=metric&lat='+lat+'&lon='+lon+'&exclude=minutely,daily,alerts&appid=6e56fb3433479d82ffab33418b64eb3b',
+        async: false,
+        dataType: 'json',
+        success: function (response) {
+            //console.log(response);
+            var station = response.current;
+
+            var txt = '<div class="owm-popup-name">';
+            txt += name;
+            txt += '</div>';
+            if (typeof station.weather != 'undefined' && typeof station.weather[0] != 'undefined') {
+                if (typeof station.weather[0].description != 'undefined'/* && typeof station.weather[0].id != 'undefined'*/) {
+                    txt += '<div class="owm-popup-description">'
+                        + station.weather[0].description// + ' (' + station.weather[0].id + ')'
+                        + '</div>';
+                }
+            }
+            var imgData = getImageData(station);
+            txt += '<div class="owm-popup-main"><img src="' + imgData.url + '" width="' + imgData.width
+                    + '" height="' + imgData.height + '" border="0" />';
+            if (typeof station != 'undefined' && typeof station.temp != 'undefined') {
+                txt += '<span class="owm-popup-temp">' + station.temp
+                    + '&nbsp;°C</span>';
+            }
+            txt += '</div>';
+            txt += '<div class="owm-popup-details">';
+            if (typeof station != 'undefined') {
+                if (typeof station.humidity != 'undefined') {
+                    txt += '<div class="owm-popup-detail">'
+                        + 'Humidity'
+                        + ': ' + station.humidity + '&nbsp;%</div>';
+                }
+                if (typeof station.pressure != 'undefined') {
+                    txt += '<div class="owm-popup-detail">'
+                        + 'Pressure'
+                        + ': ' + station.pressure + '&nbsp;hPa</div>';
+                }
+                if (true) {
+                    if (typeof station.temp_max != 'undefined' && typeof station.temp_min != 'undefined') {
+                        txt += '<div class="owm-popup-detail">'
+                            + 'Temp. min/max'
+                            + ': '
+                                + station.temp_min
+                            + '&nbsp;/&nbsp;'
+                            + station.temp_max
+                            + '&nbsp;°C</div>';
+                    }
+                }
+            }
+            if (station.rain != null && typeof station.rain != 'undefined' && typeof station.rain['1h'] != 'undefined') {
+                txt += '<div class="owm-popup-detail">'
+                    + 'Rain (1h)'
+                    + ': ' + station.rain['1h'] + '&nbsp;ml</div>';
+            }
+            if (typeof station.wind_speed != 'undefined' && typeof station.wind_deg != 'undefined') {
+                if (typeof station.wind_speed != 'undefined') {
+                    txt += '<div class="owm-popup-detail">';
+                    txt += 'Wind' + ': '
+                        + station.wind_speed + '&nbsp;'
+                        + 'm/s';
+                    txt += '</div>';
+                }
+                if (typeof station.wind_deg != 'undefined') {
+                    txt += '<div class="owm-popup-detail">';
+                    txt += 'Direction' + ': ';
+                    txt += station.wind_deg + '°';
+                    txt += '</div>';
+                }
+            }
+            if (typeof station.uvi != 'undefined') {
+                if (typeof station.uvi != 'undefined') {
+                    txt += '<div class="owm-popup-detail">';
+                    txt += 'UV index' + ': '
+                        + station.uvi + '&nbsp;';
+                    txt += '</div>';
+                }
+            }
+            if (typeof station.dt != 'undefined' && true) {
+                txt += '<div class="owm-popup-timestamp">';
+                txt += '(' + convertTimestamp(station.dt) + ')';
+                txt += '</div>';
+            }
+            txt += '</div>';
+            var popup = L.popup()
+                .setLatLng([lat, lon])
+                .setContent(txt)
+                .openOn(map);
+            map.setView([lat, lon]);
+        }
+    });
 }
 
 map.on('click', onMapClick);
