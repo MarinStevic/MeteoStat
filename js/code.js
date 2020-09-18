@@ -203,6 +203,17 @@ function locateAndShowCity(lat, lon, name) {
                 .setContent(txt)
                 .openOn(map);
             map.setView([lat, lon],13);
+            
+            var data = [];
+
+            for (var i = 0; i < response.hourly.length; i++){
+                var reading = {
+                    "temperature": response.hourly[i].temp,
+                    "timestamp": convertTimestamp(response.hourly[i].dt)
+                }
+                data.push(reading);
+            }
+            draw(data);
         }
     });
 }
@@ -299,8 +310,123 @@ function onMapClick(e) {
                 .setContent(txt)
                 .openOn(map);
             map.setView([lat, lon]);
+            
+            var data = [];
+
+            for (var i = 0; i < response.hourly.length; i++){
+                var reading = {
+                    "temperature": response.hourly[i].temp,
+                    "timestamp": convertTimestamp(response.hourly[i].dt)
+                }
+                data.push(reading);
+            }
+            draw(data);
         }
     });
 }
 
 map.on('click', onMapClick);
+
+//Temperature graph
+const xValue = d => d.timestamp;
+const xLabel = 'Past 2 days';
+const yValue = d => d.temperature;
+const yLabel = 'Temperature';
+const margin = { left: 120, right: 30, top: 20, bottom: 120 };
+
+var elmnt = document.getElementById("graph");
+const svg = d3.select('svg');
+const width = elmnt.offsetWidth;
+const height = elmnt.offsetHeight;
+const innerWidth = width - margin.left - margin.right;
+const innerHeight = height - margin.top - margin.bottom;
+
+const g = svg.append('g')
+    .attr('transform', `translate(${margin.left},${margin.top})`);
+const xAxisG = g.append('g')
+    .attr('transform', `translate(0, ${innerHeight})`);
+const yAxisG = g.append('g');
+
+const xScale = d3.scaleTime();
+const yScale = d3.scaleLinear();
+
+const xAxis = d3.axisBottom()
+    .scale(xScale)
+    .tickPadding(15)
+    .ticks(10)
+    .tickSize(-innerHeight);
+
+const yTicks = 5;
+const yAxis = d3.axisLeft()
+    .scale(yScale)
+    .ticks(yTicks)
+    .tickPadding(15)
+    .tickSize(-innerWidth);
+
+const line = d3.line()
+    .x(d => xScale(xValue(d)))
+    .y(d => yScale(yValue(d)))
+    .curve(d3.curveBasis);
+
+const row = d => {
+    d.timestamp = new Date(d.timestamp);
+    d.temperature = +d.temperature;
+    return d;
+};
+
+function initGraph() {
+    if (!init) {
+        xAxisG.append('text')
+            .attr('class', 'axis-label')
+            .attr('x', innerWidth / 2)
+            .attr('y', 100)
+            .text(xLabel);
+
+        yAxisG.append('text')
+            .attr('class', 'axis-label')
+            .attr('x', -innerHeight / 2)
+            .attr('y', -60)
+            .attr('transform', `rotate(-90)`)
+            .style('text-anchor', 'middle')
+            .text(yLabel);
+    }
+}
+
+function draw(data) {
+    initGraph();
+
+    const t = d3.transition().duration(1000)
+    
+    xScale
+    .domain(d3.extent(data, xValue))
+    .range([0, innerWidth]);
+
+    yScale
+    .domain(d3.extent(data, yValue))
+    .range([innerHeight, 0])
+    .nice(yTicks);
+
+    g.append('path')
+        .attr('fill', 'none')
+        .attr('class', 'line')
+        .attr("stroke", 'steelblue')
+        .attr('stroke-width', 4);
+    
+    const chart = g.select('.line')
+        .datum(data);
+
+    chart.exit().remove()
+
+    const enter = chart.enter();
+    
+    enter.merge(chart)
+        .transition(t)
+        .attr("d", line(data));
+
+    xAxisG.call(xAxis);
+    yAxisG.call(yAxis);
+}
+
+function instruct() {
+    alert("Postoje 2 načina korištenja aplikacije:\n\n1. Kliknite bilo gdje na karti i otvoriti će vam se prozor s trenutnim meteorološkim podatcima za traženo mjesto. Podatci se uzimaju s najbliže meteorološke postaje od odabranih koordinata.\n\n2. Otvorite izbornik s lijeve strane pritiskom na 3 ravne horiznotalne linije. Potom odaberite grad s popisa ili unesite ime traženog grada u tražilicu. Kada ste odabrali svoj grad pritisnite ciljnik koji se pojavljuje s desne strane imena grada i na karti će vam se pojaviti trenutni meteorološki podatci za traženi grad.\n\n\nOdabirom mjesta također se pojavljuju temperaturni podatci za protekla 2 dana na grafu ispod karte.");
+}
