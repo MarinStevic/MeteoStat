@@ -332,9 +332,11 @@ const xValue = d => d.timestamp;
 const xLabel = 'Past 2 days';
 const yValue = d => d.temperature;
 const yLabel = 'Temperature';
-const margin = { left: 120, right: 30, top: 20, bottom: 120 };
+const margin = { left: 120, right: 50, top: 60, bottom: 120 };
 
 var elmnt = document.getElementById("graph");
+var parseTime = d3.timeParse("%d-%b-%y");
+var formatTime = d3.timeFormat("%B %d\n%I %p");
 const svg = d3.select('svg');
 const width = elmnt.offsetWidth;
 const height = elmnt.offsetHeight;
@@ -364,15 +366,19 @@ const yAxis = d3.axisLeft()
     .tickSize(-innerWidth);
 
 const line = d3.line()
+    .curve(d3.curveBasis)   //commenting this line out will remove the smoothing of the graph line
     .x(d => xScale(xValue(d)))
-    .y(d => yScale(yValue(d)))
-    .curve(d3.curveBasis);
+    .y(d => yScale(yValue(d)));
 
 const row = d => {
     d.timestamp = new Date(d.timestamp);
     d.temperature = +d.temperature;
     return d;
 };
+
+var div = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
 
 function initGraph() {
     if (!init) {
@@ -392,25 +398,60 @@ function initGraph() {
     }
 }
 
+var br = 0;
+
 function draw(data) {
+    data.forEach(function(d) {
+        d.date = parseTime(d.timestamp);
+        d.temperature = +d.temperature;
+    });
+
     initGraph();
 
     const t = d3.transition().duration(1000)
     
-    xScale
-    .domain(d3.extent(data, xValue))
-    .range([0, innerWidth]);
+    xScale.domain(d3.extent(data, xValue))
+        .range([0, innerWidth]);
 
-    yScale
-    .domain(d3.extent(data, yValue))
-    .range([innerHeight, 0])
-    .nice(yTicks);
+    yScale.domain(d3.extent(data, yValue))
+        .range([innerHeight, 0])
+        .nice(yTicks);
 
     g.append('path')
         .attr('fill', 'none')
         .attr('class', 'line')
         .attr("stroke", 'steelblue')
         .attr('stroke-width', 4);
+
+    if(br == 0) {
+        br += 1;
+        g.selectAll("dot")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("r", 4)
+            .attr("cx", function(d) { return xScale(d.timestamp); })
+            .attr("cy", function(d) { return yScale(d.temperature); })
+            .on("mouseover", function(d) {
+                div.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                div.html(formatTime(d.timestamp) + "<br/>" + d.temperature + "°C")
+                    .style("left", (d3.event.pageX-40) + "px")
+                    .style("top", (d3.event.pageY-60) + "px");
+            })
+            .on("mouseout", function(d) {
+                div.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+            });
+    } else {
+        g.selectAll("circle")
+            .data(data)
+            .transition(t)
+            .attr("cx", function(d) { return xScale(d.timestamp); })
+            .attr("cy", function(d) { return yScale(d.temperature); })
+    }
     
     const chart = g.select('.line')
         .datum(data);
